@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
+	"gorm.io/gorm"
 )
 
 type MailLog struct {
@@ -35,6 +36,9 @@ func AddNewEmail(m *MailLog) (err error) {
 
 func GetOneEmail(m *MailLog, id string) (err error) {
 	if err := DB.Where("id = ?", id).First(m).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil
+		}
 		return err
 	}
 	return nil
@@ -67,6 +71,15 @@ func PutOneEmail(m *MailLog) (err error) {
 	DB.Save(m)
 	return nil
 }
+
+/*
+func UpdateCheckResult(m *MailLog) error {
+	if err := DB.Model(m).Where("user_id = ? AND domain = ?", m.UserId, m.MailLog).Updates(MailLog{Valid: m.Valid, CurrentSpfRecord: m.CurrentSpfRecord, CurrentDkimRecord: m.CurrentDkimRecord}).Error; err != nil {
+		return err
+	}
+	return nil
+}
+*/
 
 func UpdateStatus(m *MailLog) error {
 	if err := DB.Model(m).Where("id = ?", m.ID).Updates(MailLog{Status: m.Status, Code: m.Code, Msg: m.Msg, Updated: m.Updated}).Error; err != nil {

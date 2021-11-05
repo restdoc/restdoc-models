@@ -8,9 +8,9 @@ import (
 
 type Summary struct {
 	ID         uint64 `gorm:"type:bigint unsigned auto_increment; not null; primary_key;" json: "id"`
-	UserId     uint64 `gorm:"type:bigint unsigned;not null;unique_index:user_id_date_domain" json:"user_id"`
-	Date       string `gorm:"type:varchar(20); not null;unique_index:user_id_date_domain" json:"date"`
-	Domain     string `gorm:"type:varchar(128);not null;unique_index:user_id_date_domain" json:"domain"`
+	UserId     uint64 `gorm:"type:bigint unsigned;not null;uniqueIndex:user_id_date_domain_id" json:"user_id"`
+	Date       string `gorm:"type:char(8); not null;uniqueIndex:user_id_date_domain_id" json:"date"`
+	DomainId   uint64 `gorm:"type:bigint unsigned;not null;uniqueIndex:user_id_date_domain_id" json:"domain_id"`
 	Processed  uint64 `gorm:"type:bigint unsigned;not null;" json:"processed"`
 	Delivered  uint64 `gorm:"type:bigint unsigned;not null;" json:"delivered"`
 	Suppressed uint64 `gorm:"type:bigint unsigned;not null;" json:"suppressed"` //软退信

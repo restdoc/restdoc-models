@@ -49,8 +49,8 @@ type Mail struct {
 	ExternalResource uint64 `gorm:"type:bigint unsigned;not null;" json:"external_resource"`
 	ParentId         uint64 `gorm:"type:bigint unsigned;not null;" json:"parent_id"`
 	Uid              uint32 `gorm:"type:int unsigned;not null;" json:"uid"`
-	Headers          string `gorm:"type:text;not null;default ''" json:"headers"`
-	BodyStructure    string `gorm:"type:text;not null;default ''" json:"body_structure"`
+	Headers          string `gorm:"type:text;" json:"headers"`
+	BodyStructure    string `gorm:"type:text;" json:"body_struct"`
 	CreateAt         int64  `gorm:"type:bigint unsigned;not null;" json:"create_at"`
 	UpdateAt         int64  `gorm:"type:bigint unsigned;not null;" json:"update_at"`
 }
@@ -83,6 +83,13 @@ func GetMailsByIds(mails *[]Mail, ids []uint64) (err error) {
 
 func GetMailsByIdArray(mails *[]Mail, ids []int64) (err error) {
 	if err := DB.Where("id in (?)", ids).Order("id desc").Find(mails).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetMailIds(list *[]Mail) (err error) {
+	if err := DB.Where("id > 0").Select([]string{"id", "user_id", "uid"}).Find(list).Error; err != nil {
 		return err
 	}
 	return nil
