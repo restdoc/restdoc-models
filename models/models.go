@@ -30,6 +30,11 @@ func Init(config *ModelConfig) error {
 		return err
 	}
 
+	return nil
+}
+
+func CreateTables() {
+
 	if DefaultConfig.SaaSDomain != "" {
 
 		var _ = reflect.TypeOf(Contact{})
@@ -51,12 +56,6 @@ func Init(config *ModelConfig) error {
 		_ = reflect.TypeOf(AppUser{})
 		_ = reflect.TypeOf(License{})
 	}
-
-	createTables()
-	return nil
-}
-
-func createTables() {
 	DB.AutoMigrate(&User{})
 	DB.AutoMigrate(&DomainUser{})
 	DB.AutoMigrate(&AppUser{})
