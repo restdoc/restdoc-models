@@ -7,19 +7,21 @@ import (
 )
 
 type DomainUser struct {
-	ID         uint64 `gorm:"type:bigint unsigned; not null; primary_key; " json: "id"`
-	DomainID   uint64 `gorm:"type:bigint unsigned; not null; " json: "domain_id"`
-	Domain     string `gorm:"type:varchar(64);not null; uniqueIndex:idx_user_domain;" json:"domain"`
-	UserID     uint64 `gorm:"type:bigint unsigned; not null; " json: "user_id"`
-	User       string `gorm:"type:varchar(64);not null; uniqueIndex:idx_user_domain;" json:"user"`
-	Name       string `gorm:"type:varchar(64);not null" json:"name"`
-	Password   string `gorm:"type:varchar(64);not null;" json:"password"`
-	UniqId     uint64 `gorm:"type:bigint unsigned;not null;" json:"uniq_id"`
-	VerifyCode string `gorm:"type:varchar(128);not null;" json:"verify_code"`
-	Valid      bool   `gorm:"type:boolean;not null;default false;" json:"valid"`
-	Type       uint8  `gorm:"type:tinyint unsigned;not null;default 0" json:"type"`
-	CreateAt   int64  `gorm:"type:bigint unsigned;not null;" json:"create_at"`
-	UpdateAt   int64  `gorm:"type:bigint unsigned;not null;" json:"update_at"`
+	ID          uint64 `gorm:"type:bigint unsigned; not null; primary_key; " json: "id"`
+	DomainID    uint64 `gorm:"type:bigint unsigned; not null; " json: "domain_id"`
+	Domain      string `gorm:"type:varchar(64);not null; uniqueIndex:idx_user_domain;" json:"domain"`
+	UserID      uint64 `gorm:"type:bigint unsigned; not null; " json: "user_id"`
+	User        string `gorm:"type:varchar(64);not null; uniqueIndex:idx_user_domain;" json:"user"`
+	Name        string `gorm:"type:varchar(64);not null" json:"name"`
+	Password    string `gorm:"type:varchar(64);not null;" json:"password"`
+	Locale      string `gorm:"type:varchar(64);not null;" json:"locale"`
+	UniqId      uint64 `gorm:"type:bigint unsigned;not null;" json:"uniq_id"`
+	VerifyCode  string `gorm:"type:varchar(128);not null;" json:"verify_code"`
+	BackupEmail string `gorm:"type:varchar(64);not null;default ''" json:"backup_email"`
+	Valid       bool   `gorm:"type:boolean;not null;default false;" json:"valid"`
+	Type        uint8  `gorm:"type:tinyint unsigned;not null;default 0" json:"type"`
+	CreateAt    int64  `gorm:"type:bigint unsigned;not null;" json:"create_at"`
+	UpdateAt    int64  `gorm:"type:bigint unsigned;not null;" json:"update_at"`
 }
 
 func (u *DomainUser) TableName() string {

@@ -16,14 +16,21 @@ type ModelConfig struct {
 	Mysql      string
 }
 
-var DefaultConfig ModelConfig
+var DefaultConfig *ModelConfig
 
 var DB *gorm.DB
 
 func Init(config *ModelConfig) error {
 
 	//todo  check config if saas reflect
-	if config.SaaSDomain != "" {
+	DefaultConfig = config
+
+	err := connect(DefaultConfig.Mysql)
+	if err != nil {
+		return err
+	}
+
+	if DefaultConfig.SaaSDomain != "" {
 
 		var _ = reflect.TypeOf(Contact{})
 		_ = reflect.TypeOf(ContactLabel{})
@@ -45,11 +52,11 @@ func Init(config *ModelConfig) error {
 		_ = reflect.TypeOf(License{})
 	}
 
-	err := connect(config.Mysql)
-	if err != nil {
-		return err
-	}
+	createTables()
+	return nil
+}
 
+func createTables() {
 	DB.AutoMigrate(&User{})
 	DB.AutoMigrate(&DomainUser{})
 	DB.AutoMigrate(&AppUser{})
@@ -66,12 +73,10 @@ func Init(config *ModelConfig) error {
 	DB.AutoMigrate(&ContactLabel{})
 	DB.AutoMigrate(&ContactLabelRelation{})
 
-	if config.SaaSDomain != "" {
+	if DefaultConfig.SaaSDomain != "" {
 		DB.AutoMigrate(&Product{})
 		DB.AutoMigrate(&License{})
 	}
-
-	return err
 }
 
 func connect(host string) error {
