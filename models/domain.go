@@ -26,18 +26,18 @@ type Domain struct {
 	TrackingHostname    string `gorm:"type:varchar(128);not null;" json:"tracking_hostname"`
 
 	ClickTracking      bool   `gorm:"type:boolean;not null;default true;" json:"click_tracking"`
-	DkimPubKey         string `gorm:"type:varchar(1000);not null;" json:"dkim_pub_key"`
-	DkimPrivateKey     string `gorm:"type:varchar(1000);not null;" json:"dkim_private_key"`
-	DkimRecord         string `gorm:"type:varchar(1000);not null;" json:"dkim_record"`
-	CurrentDkimRecord  string `gorm:"type:varchar(1000);not null;" json:"current_dkim_record"`
-	SpfRecord          string `gorm:"type:varchar(1000);not null;" json:"spf_record"`
-	CurrentSpfRecord   string `gorm:"type:varchar(1000);not null;" json:"current_spf_record"`
-	MxaRecord          string `gorm:"type:varchar(1000);not null;" json:"mxa_record"`
-	MxbRecord          string `gorm:"type:varchar(1000);not null;" json:"mxb_record"`
-	CurrentMxaRecord   string `gorm:"type:varchar(1000);not null;" json:"current_mxa_record"`
-	CurrentMxbRecord   string `gorm:"type:varchar(1000);not null;" json:"current_mxb_record"`
-	DmarcRecord        string `gorm:"type:varchar(1000);not null;" json:"dmarc_record"`
-	CurrentDmarcRecord string `gorm:"type:varchar(1000);not null;" json:"current_dmarc_record"`
+	DkimPubKey         string `gorm:"type:text;not null;" json:"dkim_pub_key"`
+	DkimPrivateKey     string `gorm:"type:text;not null;" json:"dkim_private_key"`
+	DkimRecord         string `gorm:"type:text;not null;" json:"dkim_record"`
+	CurrentDkimRecord  string `gorm:"type:text;not null;" json:"current_dkim_record"`
+	SpfRecord          string `gorm:"type:text;not null;" json:"spf_record"`
+	CurrentSpfRecord   string `gorm:"type:text;not null;" json:"current_spf_record"`
+	MxaRecord          string `gorm:"type:text;not null;" json:"mxa_record"`
+	MxbRecord          string `gorm:"type:text;not null;" json:"mxb_record"`
+	CurrentMxaRecord   string `gorm:"type:text;not null;" json:"current_mxa_record"`
+	CurrentMxbRecord   string `gorm:"type:text;not null;" json:"current_mxb_record"`
+	DmarcRecord        string `gorm:"type:text;not null;" json:"dmarc_record"`
+	CurrentDmarcRecord string `gorm:"type:text;not null;" json:"current_dmarc_record"`
 	SpfValid           bool   `gorm:"type:boolean;not null;default false;" json:"spf_valid"`
 	Hostname           string `gorm:"type:varchar(128);not null;" json:"hostname"`
 	SmtpServer         string `gorm:"type:varchar(128);not null;" json:"smtp_server"`
@@ -77,8 +77,15 @@ func GetOneDomain(d *Domain, id string, user_id string) (err error) {
 	return nil
 }
 
+func GetDomainsByRootDomain(domains *[]Domain, rootDomain string) (err error) {
+	if err := DB.Where("root_domain = ?", rootDomain).Select("user_id,root_domain").Find(domains).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func GetDomainByName(d *Domain, domain string) (err error) {
-	if err := DB.First(d, "domain = ?", domain).Error; err != nil {
+	if err := DB.Where("domain = ?", domain).First(d).Error; err != nil {
 		return err
 	}
 	return nil
@@ -91,7 +98,7 @@ func GetDomainByNameAndUser(d *Domain, domain string, user_id uint64) (err error
 	return nil
 }
 
-func GetDomainsByUserId(domains *[]Domain, user_id uint64) (err error) {
+func GetDomainsByUserId(domains *[]Domain, user_id uint64, limit int, offset int) (err error) {
 	if err := DB.Where("user_id = ?", user_id).Find(&domains).Error; err != nil {
 		fmt.Println(err)
 		return err
@@ -106,6 +113,7 @@ func PutOneDomain(d *Domain) (err error) {
 
 func UpdateCheckResult(d *Domain) error {
 	ts := time.Now().Unix()
+
 	updates := map[string]interface{}{
 		"valid":                d.Valid,
 		"current_spf_record":   d.CurrentSpfRecord,
@@ -141,6 +149,5 @@ func DeleteDomain(d *Domain, domain string, user_id uint64) (err error) {
 	if err := DB.Where("user_id = ? AND domain = ?", user_id, domain).Delete(d).Error; err != nil {
 		return err
 	}
-
 	return nil
 }

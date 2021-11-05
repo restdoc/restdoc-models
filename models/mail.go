@@ -49,8 +49,8 @@ type Mail struct {
 	ExternalResource uint64 `gorm:"type:bigint unsigned;not null;" json:"external_resource"`
 	ParentId         uint64 `gorm:"type:bigint unsigned;not null;" json:"parent_id"`
 	Uid              uint32 `gorm:"type:int unsigned;not null;" json:"uid"`
-	Headers          string `gorm:"type:text;" json:"headers"`
-	BodyStructure    string `gorm:"type:text;" json:"body_struct"`
+	Headers          string `gorm:"type:text;not null;default ''" json:"headers"`
+	BodyStructure    string `gorm:"type:text;not null;default ''" json:"body_structure"`
 	CreateAt         int64  `gorm:"type:bigint unsigned;not null;" json:"create_at"`
 	UpdateAt         int64  `gorm:"type:bigint unsigned;not null;" json:"update_at"`
 }
@@ -75,6 +75,13 @@ func GetOneMail(m *Mail, id uint64, user_id uint64) (err error) {
 }
 
 func GetMailsByIds(mails *[]Mail, ids []uint64) (err error) {
+	if err := DB.Where("id in (?)", ids).Order("id desc").Find(mails).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetMailsByIdArray(mails *[]Mail, ids []int64) (err error) {
 	if err := DB.Where("id in (?)", ids).Order("id desc").Find(mails).Error; err != nil {
 		return err
 	}
@@ -361,6 +368,34 @@ func DeleteMail(mails *[]Mail, user_id uint64) (err error) {
 	m := Mail{UserId: user_id}
 
 	if err := DB.Unscoped().Where("user_id = ? AND id in (?)", user_id, ids).Delete(m).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetAllMails(mails *[]Mail) (err error) {
+	if err := DB.Select([]string{"id", "user_id", "type", "is_read", "is_starred", "is_important"}).Find(mails).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetAllMailsId(mails *[]Mail) (err error) {
+	if err := DB.Where("id > 0").Select([]string{"id", "user_id"}).Find(mails).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateMailUid(mail *Mail, user_id uint64) error {
+
+	ts := time.Now().Unix()
+	updates := map[string]interface{}{
+		"uid":       mail.Uid,
+		"update_at": ts,
+	}
+
+	if err := DB.Model(mail).Where("id = ? AND user_id = ?", mail.ID, user_id).Updates(updates).Error; err != nil {
 		return err
 	}
 	return nil

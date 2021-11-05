@@ -10,7 +10,7 @@ type Server struct {
 	Id      uint64 `gorm:"type:bigint unsigned;not null;primary key;" json:"id"`
 	Ip      string `gorm:"type:varchar(20);not null;" json:"ip"`
 	Port    int32  `gorm:"type:int unsigned;not null;uniqueIndex:idx_rdns_port" json:"port"`
-	Rdns    string `gorm:"type:varchar(100);not null;uniqueIndex:idx_rdns_port;" json:"rdns"`
+	Rdns    string `gorm:"type:varchar(100);not null;uniqueIndex:idx_rdns_port" json:"rdns"`
 	Prefix  string `gorm:"type:varchar(20);not null;" json:"prefix"`
 	Type    uint8  `gorm:"type:tinyint(8);not null;" json:"type"`
 	Foreign uint8  `gorm:"type:tinyint(8);not null;" json:"foreign"`

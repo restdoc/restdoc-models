@@ -37,6 +37,13 @@ func GetOneLabelRelation(lr *LabelRelation, id uint64, user_id uint64) (err erro
 	return nil
 }
 
+func GetAllLabelRelations(lrs *[]LabelRelation) (err error) {
+	if err := DB.Select([]string{"mail_id", "user_id", "label_id"}).Find(lrs).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func GetLabelRelationsByUserId(lrs *[]LabelRelation, user_id uint64, limit int, offset int) (err error) {
 	if err := DB.Where("user_id = ?", user_id).Order("id").Find(lrs).Limit(limit).Offset(offset).Error; err != nil {
 		fmt.Println(err)
@@ -112,8 +119,6 @@ func ChangeMailLabelRelation(lrs *[]LabelRelation, fromId uint64, toId uint64, u
 }
 
 func AddRelations(lrs *[]LabelRelation) (err error) {
-
-	//clause.OnConflict{DoNothing: true}
 	DB.Clauses(clause.OnConflict{DoNothing: true}).Create(*lrs)
 	return nil
 }

@@ -35,8 +35,8 @@ func UserCount() int64 {
 	var count int64
 	DB.Model(&User{}).Where("id > ?", 0).Count(&count)
 	return count
-
 }
+
 func AddNewUser(u *User) (err error) {
 	if err = DB.Create(u).Error; err != nil {
 		return err
@@ -53,6 +53,13 @@ func GetOneUser(u *User, id string) (err error) {
 
 func GetUserByEmail(u *User, email string) (err error) {
 	if err := DB.Where("email = ?", email).First(u).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetUserByName(u *User, name string) (err error) {
+	if err := DB.Where("name = ?", name).First(u).Error; err != nil {
 		return err
 	}
 	return nil

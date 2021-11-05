@@ -76,13 +76,18 @@ func PutOneLabel(l *Label) (err error) {
 
 /*
 func UpdateStatus(l *Label) error {
-	ts := time.Now().Unix()
-	if err := DB.Model(l).Where("id = ? AND user_id = ?", m.ID, m.UserId).Updates(Label{Valid: d.Valid, CurrentSpfRecord: d.CurrentSpfRecord, CurrentDkimRecord: d.CurrentDkimRecord, CurrentDmarcRecord: d.CurrentDmarcRecord, CurrentMxaRecord: d.CurrentMxaRecord, CurrentMxbRecord: d.CurrentMxbRecord, UpdateAt: ts}).Error; err != nil {
+       ts := time.Now().Unix()
+*/
+
+func UpdateLabelName(l *Label, newName string) error {
+	updates := map[string]interface{}{
+		"label_name": newName,
+	}
+	if err := DB.Model(l).Where("id = ? AND user_id = ?", l.ID, l.UserId).Updates(updates).Error; err != nil {
 		return err
 	}
 	return nil
 }
-*/
 
 func DeleteLabel(l *Label, id uint64, user_id uint64) (err error) {
 	if err := DB.Unscoped().Where("id = ? AND user_id = ?", id, user_id).Delete(l).Error; err != nil {
