@@ -68,7 +68,7 @@ func SaveSummary(s *Summary) error {
 
 	//db.Where(User{Name: "non_existing"}).Attrs(User{Age: 20}).FirstOrCreate(&user)
 
-	rows := DB.Model(s).Where("user_id = ? and date = ? and domain = ?", s.UserId, s.Date, s.Domain).Updates(Summary{Processed: s.Processed, Delivered: s.Delivered, Suppressed: s.Suppressed, Dropped: s.Dropped, Spam: s.Spam}).RowsAffected
+	rows := DB.Model(s).Where("user_id = ? and date = ? and domain_id = ?", s.UserId, s.Date, s.DomainId).Updates(Summary{Processed: s.Processed, Delivered: s.Delivered, Suppressed: s.Suppressed, Dropped: s.Dropped, Spam: s.Spam}).RowsAffected
 	if rows == 0 {
 		DB.Save(s)
 	}
