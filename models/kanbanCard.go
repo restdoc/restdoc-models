@@ -74,3 +74,13 @@ func DeleteKanbanCard(c *KanbanCard, id string) (err error) {
 	DB.Where("id = ?", id).Delete(c)
 	return nil
 }
+
+func DeleteKanbanCards(ids []uint64) (err error) {
+	DB.Delete(&KanbanCard{}, ids)
+	return nil
+}
+
+func DeleteKanbanCardsByProjectId(projectId uint64, creatorId uint64) (err error) {
+	DB.Where("project_id = ? AND creator_Id = ?", projectId, creatorId).Delete(KanbanCard{})
+	return nil
+}

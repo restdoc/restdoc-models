@@ -67,3 +67,8 @@ func DeleteKanbanList(ls *KanbanList, id uint64, creatorId uint64) (err error) {
 	}
 	return nil
 }
+
+func DeleteKanbanListsByProjectId(projectId uint64, creatorId uint64) (err error) {
+	DB.Where("project_id = ? AND creator_Id = ?", projectId, creatorId).Delete(KanbanList{})
+	return nil
+}
