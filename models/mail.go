@@ -40,6 +40,7 @@ var SpamMailbox = PrivateLabel{Id: 202, Name: "Spam", LowerName: "spam"}
 var ReadedMailbox = PrivateLabel{Id: 192, Name: "Readed", LowerName: "readed", Flag: "\\seen"}
 var UnreadMailbox = PrivateLabel{Id: 192, Name: "Unread", LowerName: "unread", Flag: "\\unseen"}
 var DeletedForeverMailbox = PrivateLabel{Id: 200, Name: "Deleteforever", LowerName: "deleteforever", Flag: ""}
+var AnsweredMailbox = PrivateLabel{Id: 193, Name: "Answered", LowerName: "answered", Flag: "\\answered"}
 
 type Mail struct {
 	ID               uint64 `gorm:"type:bigint  unsigned; not null; primary_key; " json: "id"`
