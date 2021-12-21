@@ -11,9 +11,9 @@ import (
 
 type LabelRelation struct {
 	ID       uint64 `gorm:"type:bigint unsigned; not null; primary_key; " json: "id"`
-	MailID   uint64 `gorm:"type:bigint unsigned; not null;uniqueIndex:idx_mail_id_user_id;" json: "mail_id"`
+	MailID   uint64 `gorm:"type:bigint unsigned; not null;uniqueIndex:idx_mail_id_label_id;" json: "mail_id"`
 	UserId   uint64 `gorm:"type:bigint unsigned;not null;" json:"user_id"`
-	LabelId  uint64 `gorm:"type:bigint unsigned;not null;uniqueIndex:idx_mail_id_user_id;" json:"label_id"`
+	LabelId  uint64 `gorm:"type:bigint unsigned;not null;uniqueIndex:idx_mail_id_label_id;" json:"label_id"`
 	Type     uint8  `gorm:"type:tinyint(8);not null;" json:"type"`
 	CreateAt int64  `gorm:"type:bigint unsigned;not null;" json:"create_at"`
 	UpdateAt int64  `gorm:"type:bigint unsigned;not null;" json:"update_at"`
@@ -152,6 +152,14 @@ func RemoveLabeledRelations(lrs *[]LabelRelation, user_id uint64, label_id uint6
 	}
 	lr := LabelRelation{UserId: user_id, LabelId: label_id}
 	if err := DB.Unscoped().Where("mail_id in (?) AND user_id = ? AND label_id = ?", mailIds, user_id, label_id).Delete(lr).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func RemoveLabeledRelationsByLabelId(user_id uint64, label_id uint64) (err error) {
+	lr := LabelRelation{UserId: user_id, LabelId: label_id}
+	if err := DB.Unscoped().Where("label_id = ? AND user_id = ?", label_id, user_id).Delete(lr).Error; err != nil {
 		return err
 	}
 	return nil

@@ -4,25 +4,42 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-const (
-	MailAll            uint8 = 0
-	MailInbox          uint8 = 1
-	MailInboxSend      uint8 = 2 //收发
-	MailSnoozed        uint8 = 10
-	MailSend           uint8 = 11
-	MailDraft          uint8 = 12
-	MailDeletedForever uint8 = 200
-	MailDeleted        uint8 = 201
-	MailSpam           uint8 = 202
-	MailStarred        uint8 = 190
-	MailImportant      uint8 = 191
-	MailReaded         uint8 = 192
-)
+/*
+
+inbox starred important
+
+all    flag: inbox starred important answerd snoozed draft sent
+spam
+deleted
+
+*/
+
+type PrivateLabel struct {
+	Id        uint8
+	Name      string
+	LowerName string
+	Flag      string
+}
+
+var AllMailbox = PrivateLabel{Id: 0, Name: "All", LowerName: "all", Flag: ""}
+var InboxMailbox = PrivateLabel{Id: 1, Name: "INBOX", LowerName: "inbox", Flag: "\\inbox"}
+var SnoozedMailbox = PrivateLabel{Id: 10, Name: "Snoozed", LowerName: "snoozed", Flag: ""}
+var SentMailbox = PrivateLabel{Id: 11, Name: "Sent", LowerName: "sent", Flag: ""}
+var DraftsMailbox = PrivateLabel{Id: 12, Name: "Drafts", LowerName: "drafts", Flag: "\\draft"}
+var StarredMailbox = PrivateLabel{Id: 190, Name: "Starred", LowerName: "starred", Flag: "\\flagged"}
+var ImportantMailbox = PrivateLabel{Id: 191, Name: "Important", LowerName: "important", Flag: "\\important"}
+var DeletedMailbox = PrivateLabel{Id: 201, Name: "Trash", LowerName: "trash", Flag: "\\deleted"}
+var SpamMailbox = PrivateLabel{Id: 202, Name: "Spam", LowerName: "spam"}
+
+var ReadedMailbox = PrivateLabel{Id: 192, Name: "Readed", LowerName: "readed", Flag: "\\seen"}
+var UnreadMailbox = PrivateLabel{Id: 192, Name: "Unread", LowerName: "unread", Flag: "\\unseen"}
+var DeletedForeverMailbox = PrivateLabel{Id: 200, Name: "Deleteforever", LowerName: "deleteforever", Flag: ""}
 
 type Mail struct {
 	ID               uint64 `gorm:"type:bigint  unsigned; not null; primary_key; " json: "id"`
@@ -41,9 +58,14 @@ type Mail struct {
 	InReplyTo        string `gorm:"type:varchar(128);not null" json:"in_reply_to"`
 	Subject          string `gorm:"type:varchar(255);not null" json:"subject"`
 	Size             uint32 `gorm:"type:int unsigned;not null; default 0" json:"size"`
+	IsInbox          bool   `gorm:"type:boolean;not null; default false" json:"is_inbox"`
 	IsImportant      bool   `gorm:"type:boolean;not null; default false" json:"is_important"`
 	IsStarred        bool   `gorm:"type:boolean;not null; default false" json:"is_starred"`
 	IsRead           bool   `gorm:"type:boolean;not null; default false" json:"is_read"`
+	IsDraft          bool   `gorm:"type:boolean;not null; default false" json:"is_draft"`
+	IsSent           bool   `gorm:"type:boolean;not null; default false" json:"is_sent"`
+	IsAnswerd        bool   `gorm:"type:boolean;not null; default false" json:"is_answerd"`
+	IsSnoozed        bool   `gorm:"type:boolean;not null; default false" json:"is_snoozed"`
 	HasAttachment    bool   `gorm:"type:boolean;not null; default false" json:"has_attachment"`
 	Type             uint8  `gorm:"type:tinyint unsigned;not null;default 0" json:"type"`
 	ExternalResource uint64 `gorm:"type:bigint unsigned;not null;" json:"external_resource"`
@@ -111,7 +133,7 @@ func GetMailsByUserIdAndParentId(mails *[]Mail, user_id uint64, parent_id uint64
 }
 
 func GetInboxMailsByUserId(mails *[]Mail, user_id uint64, limit int, offset int) (err error) {
-	if err := DB.Where("user_id = ? AND `type` = ?", user_id, MailInbox).Order("id desc").Limit(limit).Offset(offset).Find(mails).Error; err != nil {
+	if err := DB.Where("user_id = ? AND `type` = ?", user_id, InboxMailbox.Id).Order("id desc").Limit(limit).Offset(offset).Find(mails).Error; err != nil {
 		fmt.Println(err)
 		return err
 	}
@@ -147,6 +169,59 @@ func GetStarredMailsByUserId(mails *[]Mail, user_id uint64, limit int, offset in
 		fmt.Println(err)
 		return err
 	}
+	return nil
+}
+
+func GetFlagedMailsByUserId(flag string, mails *[]Mail, user_id uint64, limit int, offset int) (err error) {
+	switch flag {
+	case "all":
+		if err := DB.Where("user_id = ? AND type = 0", user_id).Order("id desc").Limit(limit).Offset(offset).Find(mails).Error; err != nil {
+			fmt.Println(err)
+			return err
+		}
+	case "inbox":
+		if err := DB.Where("user_id = ? AND is_inbox = 1 AND type = 0", user_id).Order("id desc").Limit(limit).Offset(offset).Find(mails).Error; err != nil {
+			fmt.Println(err)
+			return err
+		}
+	case "important":
+		if err := DB.Where("user_id = ? AND is_important = 1 AND type = 0", user_id).Order("id desc").Limit(limit).Offset(offset).Find(mails).Error; err != nil {
+			fmt.Println(err)
+			return err
+		}
+	case "starred":
+		if err := DB.Where("user_id = ? AND is_starred = 1 AND type = 0", user_id).Order("id desc").Limit(limit).Offset(offset).Find(mails).Error; err != nil {
+			fmt.Println(err)
+			return err
+		}
+	case "read":
+		if err := DB.Where("user_id = ? AND is_read = 1 AND type = 0", user_id).Order("id desc").Limit(limit).Offset(offset).Find(mails).Error; err != nil {
+			fmt.Println(err)
+			return err
+		}
+	case "draft", "drafts":
+		if err := DB.Where("user_id = ? AND is_draft = 1 AND type = 0", user_id).Order("id desc").Limit(limit).Offset(offset).Find(mails).Error; err != nil {
+			fmt.Println(err)
+			return err
+		}
+	case "sent", "send":
+		if err := DB.Where("user_id = ? AND is_sent = 1 AND type = 0", user_id).Order("id desc").Limit(limit).Offset(offset).Find(mails).Error; err != nil {
+			fmt.Println(err)
+			return err
+		}
+	case "answerd":
+		if err := DB.Where("user_id = ? AND is_answerd = 1 AND type = 0", user_id).Order("id desc").Limit(limit).Offset(offset).Find(mails).Error; err != nil {
+			fmt.Println(err)
+			return err
+		}
+	case "snoozed":
+		if err := DB.Where("user_id = ? AND is_snoozed = 1 AND type = 0", user_id).Order("id desc").Limit(limit).Offset(offset).Find(mails).Error; err != nil {
+			fmt.Println(err)
+			return err
+		}
+	default:
+	}
+
 	return nil
 }
 
@@ -394,16 +469,42 @@ func GetAllMailsId(mails *[]Mail) (err error) {
 	return nil
 }
 
-func UpdateMailUid(mail *Mail, user_id uint64) error {
-
-	ts := time.Now().Unix()
-	updates := map[string]interface{}{
-		"uid":       mail.Uid,
-		"update_at": ts,
+func CheckMailboxName(name string) bool {
+	ok := true
+	switch strings.ToLower(name) {
+	case AllMailbox.LowerName,
+		InboxMailbox.LowerName,
+		SnoozedMailbox.LowerName,
+		SentMailbox.LowerName,
+		DraftsMailbox.LowerName,
+		StarredMailbox.LowerName,
+		ImportantMailbox.LowerName,
+		DeletedMailbox.LowerName,
+		SpamMailbox.LowerName,
+		ReadedMailbox.LowerName,
+		DeletedForeverMailbox.LowerName:
+		ok = false
+	default:
 	}
+	return ok
+}
 
-	if err := DB.Model(mail).Where("id = ? AND user_id = ?", mail.ID, user_id).Updates(updates).Error; err != nil {
-		return err
+func CheckMailboxId(id uint64) bool {
+	ok := true
+	switch id {
+	case uint64(AllMailbox.Id),
+		uint64(InboxMailbox.Id),
+		uint64(SnoozedMailbox.Id),
+		uint64(SentMailbox.Id),
+		uint64(DraftsMailbox.Id),
+		uint64(StarredMailbox.Id),
+		uint64(ImportantMailbox.Id),
+		uint64(DeletedMailbox.Id),
+		uint64(SpamMailbox.Id),
+		uint64(ReadedMailbox.Id),
+		uint64(DeletedForeverMailbox.Id):
+		ok = false
+	default:
 	}
-	return nil
+	return ok
 }
