@@ -457,7 +457,7 @@ func DeleteMail(mails *[]Mail, user_id uint64) (err error) {
 }
 
 func GetAllMails(mails *[]Mail) (err error) {
-	if err := DB.Select([]string{"id", "user_id", "type", "is_read", "is_starred", "is_important"}).Find(mails).Error; err != nil {
+	if err := DB.Select([]string{"id", "user_id", "type", "is_read", "is_inbox", "is_sent", "is_draft", "is_starred", "is_important"}).Find(mails).Error; err != nil {
 		return err
 	}
 	return nil
