@@ -1,0 +1,11 @@
+main
+bin/
+config.toml
+*.lock
+*.txt
+logs
+/tmp
+.DS_Store
+.idea
+vendor
+.vscode

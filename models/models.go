@@ -1,20 +1,27 @@
-package Models
+package RestdocModels
 
 import (
+	"fmt"
 	"reflect"
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/cockroachdb/cockroach-go/v2/crdb/crdbgorm"
+
+	//"github.com/cockroachdb/cockroach-go/v2/crdb/crdbgorm"
+	// _ "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	//"gorm.io/gorm/schema"
 )
 
 type ModelConfig struct {
-	Debug  bool
-	Mock   bool
-	IsSaaS bool
-	Mysql  string
+	Debug      bool
+	Mock       bool
+	IsSaaS     bool
+	Mysql      string
+	Postgresql string
 }
 
 var DefaultConfig *ModelConfig
@@ -23,7 +30,6 @@ var DB *gorm.DB
 
 func Init(config *ModelConfig) error {
 
-	//todo  check config if saas reflect
 	DefaultConfig = config
 
 	err := connect(DefaultConfig.Mysql)
@@ -36,58 +42,30 @@ func Init(config *ModelConfig) error {
 
 func CreateTables() {
 
-	var _ = reflect.TypeOf(AppUser{})
-	_ = reflect.TypeOf(Contact{})
-	_ = reflect.TypeOf(ContactLabel{})
-	_ = reflect.TypeOf(ContactLabelRelation{})
-	_ = reflect.TypeOf(Domain{})
-	_ = reflect.TypeOf(DomainUser{})
-	_ = reflect.TypeOf(KanbanCard{})
-	_ = reflect.TypeOf(KanbanList{})
-	_ = reflect.TypeOf(KanbanProject{})
-	_ = reflect.TypeOf(Label{})
-	_ = reflect.TypeOf(LabelRelation{})
-	_ = reflect.TypeOf(License{})
-	_ = reflect.TypeOf(Mail{})
-	_ = reflect.TypeOf(MailLog{})
-	_ = reflect.TypeOf(Product{})
-	_ = reflect.TypeOf(Rule{})
-	_ = reflect.TypeOf(Server{})
+	var _ = reflect.TypeOf(User{})
 	_ = reflect.TypeOf(Session{})
-	_ = reflect.TypeOf(Summary{})
-	_ = reflect.TypeOf(User{})
-	_ = reflect.TypeOf(Unsub{})
+	_ = reflect.TypeOf(VerifyCode{})
 	_ = reflect.TypeOf(RestAPI{})
 	_ = reflect.TypeOf(RestParam{})
 	_ = reflect.TypeOf(RestProject{})
+	_ = reflect.TypeOf(RestGroup{})
+	_ = reflect.TypeOf(RestAPI{})
+	_ = reflect.TypeOf(RestEndpoint{})
+	_ = reflect.TypeOf(Team{})
+	_ = reflect.TypeOf(TeamUser{})
 
-	DB.AutoMigrate(&AppUser{})
-	DB.AutoMigrate(&Contact{})
-	DB.AutoMigrate(&ContactLabel{})
-	DB.AutoMigrate(&ContactLabelRelation{})
-	DB.AutoMigrate(&Domain{})
-	DB.AutoMigrate(&DomainUser{})
-	DB.AutoMigrate(&KanbanProject{})
-	DB.AutoMigrate(&KanbanList{})
-	DB.AutoMigrate(&KanbanCard{})
-	DB.AutoMigrate(&Label{})
-	DB.AutoMigrate(&LabelRelation{})
-	DB.AutoMigrate(&Mail{})
-	DB.AutoMigrate(&MailLog{})
-	DB.AutoMigrate(&Rule{})
-	DB.AutoMigrate(&Server{})
-	DB.AutoMigrate(&Summary{})
 	DB.AutoMigrate(&User{})
-	DB.AutoMigrate(&Unsub{})
+	DB.AutoMigrate(&VerifyCode{})
 	DB.AutoMigrate(&RestAPI{})
 	DB.AutoMigrate(&RestParam{})
 	DB.AutoMigrate(&RestProject{})
+	DB.AutoMigrate(&RestGroup{})
+	DB.AutoMigrate(&RestAPI{})
+	DB.AutoMigrate(&RestEndpoint{})
+	DB.AutoMigrate(&Team{})
+	DB.AutoMigrate(&TeamUser{})
 	//add index labelRelation labelId
 
-	if DefaultConfig.IsSaaS {
-		DB.AutoMigrate(&License{})
-		DB.AutoMigrate(&Product{})
-	}
 }
 
 func connect(host string) error {
@@ -103,9 +81,23 @@ func connect(host string) error {
 			DB, err = gorm.Open(mysql.New(mysql.Config{Conn: sqlDB, SkipInitializeWithVersion: true}), // auto configure based on currently MySQL version
 				&gorm.Config{})
 		} else {
-			DB, err = gorm.Open(mysql.Open(host), &gorm.Config{})
-			if err != nil {
-				return err
+
+			if DefaultConfig.Mysql != "" {
+				DB, err = gorm.Open(mysql.Open(DefaultConfig.Mysql), &gorm.Config{})
+				if err != nil {
+					fmt.Println(err)
+					return err
+				}
+			}
+
+			if DefaultConfig.Postgresql != "" {
+				fmt.Println("connect postgresql")
+				DB, err = gorm.Open(postgres.Open(DefaultConfig.Postgresql), &gorm.Config{})
+
+				if err != nil {
+					fmt.Println(err)
+					return err
+				}
 			}
 
 		}
