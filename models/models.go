@@ -110,7 +110,7 @@ func connect(host string) error {
 		db.SetMaxOpenConns(100)
 
 		// SetConnMaxLifetime sets the maximum amount of time a connection may be reused.
-		db.SetConnMaxLifetime(time.Hour * 87600)
+		db.SetConnMaxLifetime(time.Minute * 20)
 		return err
 	}
 
