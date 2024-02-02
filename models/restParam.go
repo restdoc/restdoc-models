@@ -14,6 +14,7 @@ type RestParam struct {
 	Weight    string `gorm:"type:varchar(32) ;not null;" json:"weight"`
 	Required  bool   `gorm:"type:boolean; not null; " json: "required"`
 	Status    int16  `gorm:"type:smallint; not null; " json: "status"`
+	Type      int16  `gorm:"type:smallint; not null; " json: "type"`
 	CreatedAt int64  `gorm:"type:bigint;not null;" json:"created_at"`
 	UpdatedAt int64  `gorm:"type:bigint;not null;" json:"updated_at"`
 }
@@ -22,16 +23,16 @@ func (rp *RestParam) TableName() string {
 	return "rest_param"
 }
 
-func GetRestParamsByAPIId(rps []*RestParam, apiId int64) (err error) {
-	selectFields := []string{"id", "api_id", "name", "title", "default", "note", "weight", "required", "status", "created_at"}
+func GetRestParamsByAPIId(rps *[]RestParam, apiId int64) (err error) {
+	selectFields := []string{"id", "api_id", "name", "title", "default", "note", "weight", "required", "status", "type", "created_at"}
 	if err = DB.Where("api_id = ?", apiId).Find(rps).Select(selectFields).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetRestParamsByIds(rps []*RestParam, ids []int64) (err error) {
-	selectFields := []string{"id", "api_id", "name", "title", "default", "note", "required", "weight", "status", "created_at"}
+func GetRestParamsByIds(rps *[]RestParam, ids []int64) (err error) {
+	selectFields := []string{"id", "api_id", "name", "title", "default", "note", "required", "weight", "status", "type", "created_at"}
 	if err = DB.Where("id in (?)", ids).Find(rps).Select(selectFields).Error; err != nil {
 		return err
 	}

@@ -25,7 +25,7 @@ func AddNewVerifyCode(v *VerifyCode) (err error) {
 	return nil
 }
 
-func GetOneVerifyCode(v *VerifyCode, id string) (err error) {
+func GetOneVerifyCode(v *VerifyCode, id int64) (err error) {
 	if err := DB.Where("id = ?", id).First(v).Error; err != nil {
 		return err
 	}

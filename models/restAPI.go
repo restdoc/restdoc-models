@@ -17,6 +17,12 @@ const (
 	METHOD_OPTION int16 = 2
 )
 
+const (
+	PARAM_GET       int16 = 1
+	PARAM_POST_FORM int16 = 2
+	PARAM_HEADER    int16 = 10
+)
+
 type RestAPI struct {
 	Id        int64  `gorm:"type:bigint; not null; primary_key; " json: "id"`
 	ProjectId int64  `gorm:"type:bigint; not null; index:project_id_index;" json: "project_id"`

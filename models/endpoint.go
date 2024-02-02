@@ -20,16 +20,16 @@ func (re *RestEndpoint) TableName() string {
 }
 
 func GetRestEndpointsByProjectId(endpoints *[]RestEndpoint, projectId int64) (err error) {
-	selectFields := []string{"id", "project_id", "name", "value", "weight", "status", "created_at"}
-	if err = DB.Where("project_id = ?", projectId).Find(endpoints).Select(selectFields).Error; err != nil {
+	endpointSelectFields := []string{"id", "project_id", "name", "value", "weight", "status", "created_at"}
+	if err = DB.Where("project_id = ?", projectId).Find(endpoints).Select(endpointSelectFields).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func GetRestEndpointsByProjectIds(endpoints *[]RestEndpoint, projectIds []int64) (err error) {
-	selectFields := []string{"id", "project_id", "name", "value", "weight", "status", "created_at"}
-	if err = DB.Where("project_id in (?)", projectIds).Find(endpoints).Select(selectFields).Error; err != nil {
+	endpointSelectFields := []string{"id", "project_id", "name", "value", "weight", "status", "created_at"}
+	if err = DB.Where("project_id in (?)", projectIds).Find(endpoints).Select(endpointSelectFields).Error; err != nil {
 		return err
 	}
 	return nil
@@ -49,6 +49,14 @@ func AddRestEndpoints(res *[]RestEndpoint) (err error) {
 
 func GetOneRestEndpoint(re *RestEndpoint, id int64) error {
 	if err := DB.Where("id = ?", id).First(re).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetRestEndpointsByIds(ends *[]RestEndpoint, ids []int64) (err error) {
+	endpointSelectFields := []string{"id", "project_id", "name", "value", "weight", "status", "created_at"}
+	if err = DB.Where("id in (?)", ids).Find(ends).Select(endpointSelectFields).Error; err != nil {
 		return err
 	}
 	return nil
