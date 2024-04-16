@@ -4,7 +4,7 @@ type ModelConfig struct {
 	Debug      bool
 	Timeout    int
 	SaaSDomain string
-	Mysql      string
+	SqlDB      string
 }
 
 var DefaultConfig Config
