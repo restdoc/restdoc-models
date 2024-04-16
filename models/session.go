@@ -1,4 +1,4 @@
-package RestdocModels
+package models
 
 type Session struct {
 	Id     string `json:"id"`

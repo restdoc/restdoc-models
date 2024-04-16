@@ -1,4 +1,4 @@
-package RestdocModels
+package models
 
 import (
 	"time"
