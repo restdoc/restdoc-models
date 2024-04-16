@@ -2,6 +2,8 @@ module github.com/restdoc/restdoc-models
 
 go 1.17
 
+replace github.com/restdoc/restdoc-models => ../restdoc-models
+
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/cockroachdb/cockroach-go/v2 v2.3.7
